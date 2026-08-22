@@ -33,6 +33,23 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1); return result[0];
 }
 
+export async function countRegisteredUsers() {
+  const db = await getDb(); if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+  return Number(result[0]?.count ?? 0);
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb(); if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email.trim().toLowerCase())).limit(1); return result[0];
+}
+
+export async function createLocalUser(input: InsertUser) {
+  const db = await getDb(); if (!db) throw new Error("Database unavailable");
+  const result = await db.insert(users).values(input);
+  return getUserByOpenId(input.openId);
+}
+
 export async function ensureRoutes() {
   const db = await getDb(); if (!db) return [];
   const existing = await db.select().from(routes);

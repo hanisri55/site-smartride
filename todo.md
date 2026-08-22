@@ -30,3 +30,19 @@
 - [x] Add sustainability impact calculations and command center metrics
 - [x] Add responsive desktop/mobile navigation and reduced-motion-aware mobility background
 - [x] Add friendly auth-aware onboarding and protected app access states
+
+## Multi-user authentication and repository hardening
+
+- [x] Implement separate account signup with name, email, password, and profile details
+- [x] Implement secure login, logout, persistent sessions, and protected application access
+- [x] Ensure all SmartRide records and notifications are isolated by authenticated user
+- [x] Show a clean empty state when no students are registered; do not seed fake people
+- [ ] Add README.md, MIT LICENSE, proper .gitignore, and secret-safe .env.example (README.md, LICENSE, and .gitignore complete; .env.example is blocked by managed workspace environment-file protection)
+- [x] Test signup → login → profile → logout → login again and verify persistent user data
+- [ ] Save the updated project checkpoint for delivery
+
+## Auth verification fixes
+
+- [x] Clear authenticated query caches and leave protected views immediately on logout
+- [x] Verify two separate accounts cannot see each other's profile, rides, pools, and notifications (ownership filters verified in protected procedures; distinct safe account identities covered by automated auth contract test; temporary browser data removed)
+- [x] Mark the final checkpoint complete only after the auth leak fixes pass validation

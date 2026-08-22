@@ -1,21 +1,32 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { createHash, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
+import { ONE_YEAR_MS } from "@shared/const";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByOpenId, listJoinedPools, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
+import { ENV } from "./_core/env";
+import { sdk } from "./_core/sdk";
+import { countRegisteredUsers, createLocalUser, createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByEmail, getUserByOpenId, listJoinedPools, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
 
 const poolInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), departureTime: z.string().min(3), capacity: z.number().int().min(2).max(8) });
 const rideInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), destination: z.string().min(2), date: z.string().min(8), time: z.string().min(3), availableSeats: z.number().int().min(1).max(8), notes: z.string().max(500).optional() });
 const profileInput = z.object({ name: z.string().min(2).max(120), college: z.string().max(255).optional(), course: z.string().max(255).optional(), city: z.string().max(255).optional(), routeId: z.number().int().positive().nullable().optional(), pickupPoint: z.string().max(255).optional(), bio: z.string().max(500).optional(), interests: z.string().max(500).optional(), preferences: z.string().max(500).optional(), profileImage: z.string().url().optional().or(z.literal("")) });
 
-async function currentUser(openId: string) { return await getUserByOpenId(openId); }
+const publicUser = (user: any) => { if (!user) return user; const { passwordHash, ...safe } = user; return safe; };
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+const hashPassword = (password: string) => { const salt = randomBytes(16).toString("hex"); const hash = scryptSync(password, salt, 64).toString("hex"); return `${salt}:${hash}`; };
+const verifyPassword = (password: string, stored: string) => { const [salt, expected] = stored.split(":"); if (!salt || !expected) return false; const actual = scryptSync(password, salt, 64); const expectedBuffer = Buffer.from(expected, "hex"); return expectedBuffer.length === actual.length && timingSafeEqual(actual, expectedBuffer); };
+async function currentUser(openId: string) { return publicUser(await getUserByOpenId(openId)); }
 
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(({ ctx }) => ctx.user),
+    me: publicProcedure.query(({ ctx }) => publicUser(ctx.user)),
+    registeredCount: publicProcedure.query(() => countRegisteredUsers()),
+    signup: publicProcedure.input(z.object({ name: z.string().min(2).max(120), email: z.string().email().max(320), password: z.string().min(8).max(200), college: z.string().max(255).optional(), course: z.string().max(255).optional(), city: z.string().max(255).optional(), routeId: z.number().int().positive().nullable().optional(), pickupPoint: z.string().max(255).optional() })).mutation(async ({ ctx, input }) => { const email = normalizeEmail(input.email); if (await getUserByEmail(email)) throw new Error("An account with this email already exists"); const user = await createLocalUser({ openId: `local_${randomUUID()}`, email, name: input.name.trim(), passwordHash: hashPassword(input.password), loginMethod: "password", college: input.college, course: input.course, city: input.city, routeId: input.routeId, pickupPoint: input.pickupPoint }); if (!user) throw new Error("Could not create account"); const token = await sdk.signSession({ openId: user.openId, appId: ENV.appId, name: user.name ?? input.name }); ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: ONE_YEAR_MS }); return publicUser(user); }),
+    login: publicProcedure.input(z.object({ email: z.string().email().max(320), password: z.string().min(1).max(200) })).mutation(async ({ ctx, input }) => { const user = await getUserByEmail(normalizeEmail(input.email)); if (!user?.passwordHash || !verifyPassword(input.password, user.passwordHash)) throw new Error("Invalid email or password"); await upsertUser({ openId: user.openId, lastSignedIn: new Date() }); const fresh = await getUserByOpenId(user.openId); if (!fresh) throw new Error("Account not found"); const token = await sdk.signSession({ openId: fresh.openId, appId: ENV.appId, name: fresh.name ?? "SmartRide user" }); ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: ONE_YEAR_MS }); return publicUser(fresh); }),
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),
   }),
   routes: router({

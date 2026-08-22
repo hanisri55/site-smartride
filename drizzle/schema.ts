@@ -3,8 +3,9 @@ import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-or
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
+  passwordHash: text("passwordHash"),
   name: text("name"),
-  email: varchar("email", { length: 320 }),
+  email: varchar("email", { length: 320 }).unique(),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   dateOfBirth: varchar("dateOfBirth", { length: 32 }),

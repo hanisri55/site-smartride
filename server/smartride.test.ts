@@ -26,3 +26,21 @@ describe("protected SmartRide procedures", () => {
     await expect(appRouter.createCaller(ctx).pools.create({ routeId: 1, pickupPoint: "Railway Station", departureTime: "08:00", capacity: 4 })).rejects.toThrow();
   });
 });
+
+
+describe("multi-account auth contract", () => {
+  it("keeps two account identities separate and strips password hashes", async () => {
+    const makeContext = (id: number, openId: string, name: string, email: string): TrpcContext => ({
+      user: { id, openId, name, email, passwordHash: "never-return-this", role: "user", loginMethod: "password", createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() } as any,
+      req: {} as TrpcContext["req"],
+      res: {} as TrpcContext["res"],
+    });
+    const accountA = await appRouter.createCaller(makeContext(101, "local-a", "Student A", "a@example.com")).auth.me();
+    const accountB = await appRouter.createCaller(makeContext(102, "local-b", "Student B", "b@example.com")).auth.me();
+    expect(accountA).toMatchObject({ id: 101, openId: "local-a", name: "Student A", email: "a@example.com" });
+    expect(accountB).toMatchObject({ id: 102, openId: "local-b", name: "Student B", email: "b@example.com" });
+    expect(accountA).not.toEqual(accountB);
+    expect(accountA).not.toHaveProperty("passwordHash");
+    expect(accountB).not.toHaveProperty("passwordHash");
+  });
+});

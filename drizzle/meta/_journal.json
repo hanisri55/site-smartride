@@ -15,6 +15,13 @@
       "when": 1787411369267,
       "tag": "0001_fuzzy_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787414812178,
+      "tag": "0002_mute_scorpion",
+      "breakpoints": true
     }
   ]
 }
