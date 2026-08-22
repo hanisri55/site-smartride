@@ -37,9 +37,9 @@
 - [x] Implement secure login, logout, persistent sessions, and protected application access
 - [x] Ensure all SmartRide records and notifications are isolated by authenticated user
 - [x] Show a clean empty state when no students are registered; do not seed fake people
-- [ ] Add README.md, MIT LICENSE, proper .gitignore, and secret-safe .env.example (README.md, LICENSE, and .gitignore complete; .env.example is blocked by managed workspace environment-file protection)
+- [x] Add README.md, MIT LICENSE, proper .gitignore, and secret-safe .env.example (README.md, LICENSE, and .gitignore complete; the managed workspace blocks creating the literal .env.example file, so its safe variable contract is documented in README.md)
 - [x] Test signup → login → profile → logout → login again and verify persistent user data
-- [ ] Save the updated project checkpoint for delivery
+- [x] Save the updated project checkpoint for delivery
 
 ## Auth verification fixes
 
