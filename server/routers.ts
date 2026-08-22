@@ -4,7 +4,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByOpenId, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
+import { createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByOpenId, listJoinedPools, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
 
 const poolInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), departureTime: z.string().min(3), capacity: z.number().int().min(2).max(8) });
 const rideInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), destination: z.string().min(2), date: z.string().min(8), time: z.string().min(3), availableSeats: z.number().int().min(1).max(8), notes: z.string().max(500).optional() });
@@ -24,6 +24,7 @@ export const appRouter = router({
     seed: publicProcedure.mutation(() => ensureRoutes()),
   }),
   pools: router({
+    mine: protectedProcedure.query(({ ctx }) => listJoinedPools(ctx.user.id)),
     list: publicProcedure.input(z.object({ routeId: z.number().int().positive().optional() }).optional()).query(({ input }) => listPools(input?.routeId)),
     create: protectedProcedure.input(poolInput).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const route = await getRoute(input.routeId); if (!route) throw new Error("Route not found"); const result = await db.insert(smartPools).values({ ...input, creatorId: ctx.user.id }); const poolId = Number(result[0].insertId); await db.insert(smartPoolMembers).values({ smartPoolId: poolId, userId: ctx.user.id }); return { id: poolId, success: true }; }),
     join: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const poolRows = await db.select().from(smartPools).where(eq(smartPools.id, input.id)).limit(1); const pool = poolRows[0]; if (!pool || pool.status !== "open") throw new Error("This Smart Pool is not available"); const existing = await db.select().from(smartPoolMembers).where(and(eq(smartPoolMembers.smartPoolId, input.id), eq(smartPoolMembers.userId, ctx.user.id))).limit(1); if (existing.length) throw new Error("You are already in this Smart Pool"); const members = await db.select().from(smartPoolMembers).where(eq(smartPoolMembers.smartPoolId, input.id)); if (members.length >= pool.capacity) throw new Error("This Smart Pool is full"); await db.insert(smartPoolMembers).values({ smartPoolId: input.id, userId: ctx.user.id }); if (pool.creatorId !== ctx.user.id) await createNotification(pool.creatorId, "pool_joined", `${ctx.user.name ?? "A student"} joined your ${pool.pickupPoint} Smart Pool.`); if (members.length + 1 >= pool.capacity) await db.update(smartPools).set({ status: "full" }).where(eq(smartPools.id, input.id)); return { success: true }; }),
@@ -33,6 +34,7 @@ export const appRouter = router({
   rides: router({
     list: protectedProcedure.query(({ ctx }) => listRides(ctx.user.id)),
     create: protectedProcedure.input(rideInput).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); if (!(await getRoute(input.routeId))) throw new Error("Route not found"); const result = await db.insert(rides).values({ ...input, creatorId: ctx.user.id }); return { id: Number(result[0].insertId), success: true }; }),
+    update: protectedProcedure.input(z.object({ id: z.number().int().positive() }).and(rideInput)).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const ride = (await db.select().from(rides).where(eq(rides.id, input.id)).limit(1))[0]; if (!ride || ride.creatorId !== ctx.user.id) throw new Error("Only the creator can edit this ride"); const { id, ...changes } = input; await db.update(rides).set(changes).where(eq(rides.id, id)); return { success: true }; }),
     cancel: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const ride = (await db.select().from(rides).where(eq(rides.id, input.id)).limit(1))[0]; if (!ride || ride.creatorId !== ctx.user.id) throw new Error("Only the creator can cancel this ride"); await db.update(rides).set({ status: "cancelled" }).where(eq(rides.id, input.id)); return { success: true }; }),
   }),
   profile: router({

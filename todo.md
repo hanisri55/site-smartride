@@ -3,7 +3,7 @@
 - [x] Review the attached product requirements and convert them into concrete user flows and domain records
 - [x] Establish an elegant, responsive visual system with distinctive typography, palette, spacing, and motion
 - [x] Implement the primary frontend flow with responsive navigation and session-aware states
-- [ ] Add polished loading, empty, error, and success states for the core experience (core states are implemented; broader query-specific error coverage remains)
+- [x] Add polished loading, empty, error, and success states for the core experience
 - [x] Add persistent database schema and typed data-access helpers for the product's core records
 - [x] Add protected tRPC procedures for application data and actions
 - [x] Enforce authenticated access for protected functionality and preserve secure session behavior
@@ -11,7 +11,7 @@
 - [x] Add Vitest coverage for core backend behavior and authorization boundaries
 - [x] Run type checks, tests, and build validation
 - [x] Verify desktop and mobile layouts with rendered screenshots
-- [ ] Save the final project checkpoint for delivery
+- [x] Save the final project checkpoint for delivery
 
 ## Change history
 
@@ -24,9 +24,9 @@
 - [x] Add Find flow for route and Smart Pool matching using route search and route-type filtering; deeper proximity ranking remains
 - [x] Add Create flow for rides and Smart Pools with backend validation and persistence
 - [x] Add Smart Pool join, leave, cancel, and capacity protection behavior
-- [ ] Add My Rides tabs and creator/member permissions for edit, cancel, and leave actions
-- [ ] Add editable profile fields, route preferences, and profile image metadata
-- [ ] Add notifications and read-state behavior
+- [x] Add My Rides tabs and creator/member permissions for edit, cancel, and leave actions
+- [x] Add editable profile fields, route preferences, and profile image metadata
+- [x] Add notifications and read-state behavior
 - [x] Add sustainability impact calculations and command center metrics
 - [x] Add responsive desktop/mobile navigation and reduced-motion-aware mobility background
 - [x] Add friendly auth-aware onboarding and protected app access states

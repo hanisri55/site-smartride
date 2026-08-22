@@ -62,6 +62,11 @@ export async function listRides(userId: number) {
   return db.select({ ride: rides, route: routes }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).where(eq(rides.creatorId, userId)).orderBy(desc(rides.createdAt));
 }
 
+export async function listJoinedPools(userId: number) {
+  const db = await getDb(); if (!db) return [];
+  return db.select({ pool: smartPools, route: routes }).from(smartPoolMembers).innerJoin(smartPools, eq(smartPoolMembers.smartPoolId, smartPools.id)).leftJoin(routes, eq(smartPools.routeId, routes.id)).where(eq(smartPoolMembers.userId, userId)).orderBy(desc(smartPools.createdAt));
+}
+
 export async function listPools(routeId?: number) {
   const db = await getDb(); if (!db) return [];
   const rows = routeId ? await db.select({ pool: smartPools, route: routes }).from(smartPools).leftJoin(routes, eq(smartPools.routeId, routes.id)).where(and(eq(smartPools.routeId, routeId), eq(smartPools.status, "open"))).orderBy(desc(smartPools.createdAt)) : await db.select({ pool: smartPools, route: routes }).from(smartPools).leftJoin(routes, eq(smartPools.routeId, routes.id)).where(eq(smartPools.status, "open")).orderBy(desc(smartPools.createdAt));
