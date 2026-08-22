@@ -1,28 +1,84 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  dateOfBirth: varchar("dateOfBirth", { length: 32 }),
+  college: varchar("college", { length: 255 }),
+  course: varchar("course", { length: 255 }),
+  city: varchar("city", { length: 255 }),
+  routeId: int("routeId"),
+  pickupPoint: varchar("pickupPoint", { length: 255 }),
+  bio: text("bio"),
+  profileImage: text("profileImage"),
+  interests: text("interests"),
+  preferences: text("preferences"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const routes = mysqlTable("routes", {
+  id: int("id").autoincrement().primaryKey(),
+  routeNumber: varchar("routeNumber", { length: 32 }).notNull().unique(),
+  routeName: varchar("routeName", { length: 255 }).notNull(),
+  origin: varchar("origin", { length: 255 }).notNull(),
+  destination: varchar("destination", { length: 255 }).notNull(),
+  stops: text("stops").notNull(),
+  routeType: mysqlEnum("routeType", ["campus", "local"]).default("campus").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const rides = mysqlTable("rides", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  routeId: int("routeId").notNull(),
+  pickupPoint: varchar("pickupPoint", { length: 255 }).notNull(),
+  destination: varchar("destination", { length: 255 }).notNull(),
+  date: varchar("date", { length: 16 }).notNull(),
+  time: varchar("time", { length: 16 }).notNull(),
+  availableSeats: int("availableSeats").notNull(),
+  notes: text("notes"),
+  status: mysqlEnum("status", ["upcoming", "completed", "cancelled"]).default("upcoming").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const smartPools = mysqlTable("smartPools", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  routeId: int("routeId").notNull(),
+  pickupPoint: varchar("pickupPoint", { length: 255 }).notNull(),
+  departureTime: varchar("departureTime", { length: 32 }).notNull(),
+  capacity: int("capacity").notNull(),
+  status: mysqlEnum("status", ["open", "full", "cancelled", "completed"]).default("open").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const smartPoolMembers = mysqlTable("smartPoolMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  smartPoolId: int("smartPoolId").notNull(),
+  userId: int("userId").notNull(),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+});
+
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: varchar("type", { length: 64 }).notNull(),
+  message: text("message").notNull(),
+  read: int("read").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-
-// TODO: Add your tables here
+export type Route = typeof routes.$inferSelect;
+export type Ride = typeof rides.$inferSelect;
+export type SmartPool = typeof smartPools.$inferSelect;
+export type SmartPoolMember = typeof smartPoolMembers.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
