@@ -63,3 +63,16 @@
 - [x] Keep Forgot Password and email-verification recovery staged but disabled until valid Resend credentials and a verified sender are configured
 - [x] Do not send fake recovery emails or expose email-provider credentials to the frontend
 - [x] Continue and deliver ride search/filtering plus existing signup, login, logout, session, and profile verification
+
+## Resend test-sender configuration
+
+- [x] Use onboarding@resend.dev only for permitted Resend test-sender scenarios
+- [x] Keep arbitrary-user password recovery disabled unless a verified sender/domain is configured
+- [x] Document the remaining Resend production configuration requirements
+- [ ] Validate the safe configuration and save a checkpoint
+
+## Resend credential validation
+
+- [x] Validate the newly supplied Resend API key through the server-side environment only
+- [x] Keep onboarding@resend.dev restricted to permitted test-sender use
+- [x] Keep arbitrary-user password recovery gated until a verified domain sender is configured

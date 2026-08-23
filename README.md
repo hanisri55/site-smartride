@@ -51,3 +51,9 @@ Do not commit `.env`, database credentials, API keys, session secrets, or passwo
 ## License
 
 This project is released under the MIT License. See [LICENSE](./LICENSE).
+
+## Password recovery email configuration
+
+The SmartRide Forgot Password interface is staged but remains intentionally gated until production email delivery is configured. The server-side Resend credential has been validated successfully, and `onboarding@resend.dev` is configured only as a test sender. Resend test-sender usage must remain limited to permitted test recipients; it is not a production sender for arbitrary registered users.
+
+To enable real password-reset emails, verify a domain in Resend, create a sender address on that domain (for example `SmartRide <no-reply@yourdomain.com>`), and update the server-side `RESEND_FROM_EMAIL` secret. Keep `RESEND_API_KEY` server-side only. Until that verified sender is configured, the application does not send password-reset messages and does not claim that account recovery is active.
