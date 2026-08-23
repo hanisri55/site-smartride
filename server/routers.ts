@@ -8,7 +8,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { ENV } from "./_core/env";
 import { sdk } from "./_core/sdk";
-import { countRegisteredUsers, createLocalUser, createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByEmail, getUserByOpenId, listJoinedPools, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
+import { countRegisteredUsers, createLocalUser, createNotification, ensureRoutes, getDb, getImpact, getRoute, getUserByEmail, getUserByOpenId, listDiscoverableRides, listJoinedPools, listPools, listRides, listRoutes, notifications, rides, smartPoolMembers, smartPools, upsertUser, users } from "./db";
 
 const poolInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), departureTime: z.string().min(3), capacity: z.number().int().min(2).max(8) });
 const rideInput = z.object({ routeId: z.number().int().positive(), pickupPoint: z.string().min(2), destination: z.string().min(2), date: z.string().min(8), time: z.string().min(3), availableSeats: z.number().int().min(1).max(8), notes: z.string().max(500).optional() });
@@ -44,6 +44,7 @@ export const appRouter = router({
   }),
   rides: router({
     list: protectedProcedure.query(({ ctx }) => listRides(ctx.user.id)),
+    discover: protectedProcedure.input(z.object({ query: z.string().max(120).optional(), routeType: z.enum(["campus", "local"]).optional(), date: z.string().max(16).optional() }).optional()).query(({ input }) => listDiscoverableRides(input)),
     create: protectedProcedure.input(rideInput).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); if (!(await getRoute(input.routeId))) throw new Error("Route not found"); const result = await db.insert(rides).values({ ...input, creatorId: ctx.user.id }); return { id: Number(result[0].insertId), success: true }; }),
     update: protectedProcedure.input(z.object({ id: z.number().int().positive() }).and(rideInput)).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const ride = (await db.select().from(rides).where(eq(rides.id, input.id)).limit(1))[0]; if (!ride || ride.creatorId !== ctx.user.id) throw new Error("Only the creator can edit this ride"); const { id, ...changes } = input; await db.update(rides).set(changes).where(eq(rides.id, id)); return { success: true }; }),
     cancel: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database unavailable"); const ride = (await db.select().from(rides).where(eq(rides.id, input.id)).limit(1))[0]; if (!ride || ride.creatorId !== ctx.user.id) throw new Error("Only the creator can cancel this ride"); await db.update(rides).set({ status: "cancelled" }).where(eq(rides.id, input.id)); return { success: true }; }),

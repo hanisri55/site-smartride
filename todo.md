@@ -46,3 +46,20 @@
 - [x] Clear authenticated query caches and leave protected views immediately on logout
 - [x] Verify two separate accounts cannot see each other's profile, rides, pools, and notifications (ownership filters verified in protected procedures; distinct safe account identities covered by automated auth contract test; temporary browser data removed)
 - [x] Mark the final checkpoint complete only after the auth leak fixes pass validation
+
+## Ride matching, account recovery, and profile editing
+
+- [x] Add ride search by origin, destination, pickup point, date, and route number
+- [x] Add ride route/type/date filters with clear loading, empty, and error states
+- [x] Keep the Forgot Password recovery UI staged, with email delivery disabled until valid Resend credentials are configured
+- [x] Defer verified password reset implementation until real email delivery is configured; no fake sending is used
+- [x] Refine profile editing for college, route, and pickup point with persistent save feedback
+- [x] Add Vitest coverage for protected ride discovery and existing auth/profile boundaries; recovery token tests remain deferred with the email integration
+- [x] Run type-check, tests, build, and responsive visual verification
+- [ ] Save the updated project checkpoint for delivery
+
+## Deferred password recovery constraint
+
+- [x] Keep Forgot Password and email-verification recovery staged but disabled until valid Resend credentials and a verified sender are configured
+- [x] Do not send fake recovery emails or expose email-provider credentials to the frontend
+- [x] Continue and deliver ride search/filtering plus existing signup, login, logout, session, and profile verification

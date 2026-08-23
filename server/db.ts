@@ -79,6 +79,18 @@ export async function listRides(userId: number) {
   return db.select({ ride: rides, route: routes }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).where(eq(rides.creatorId, userId)).orderBy(desc(rides.createdAt));
 }
 
+export async function listDiscoverableRides(filters?: { query?: string; routeType?: "campus" | "local"; date?: string }) {
+  const db = await getDb(); if (!db) return [];
+  const conditions = [eq(rides.status, "upcoming")];
+  if (filters?.query) {
+    const q = `%${filters.query}%`;
+    conditions.push(or(like(routes.routeNumber, q), like(routes.routeName, q), like(routes.origin, q), like(routes.destination, q), like(rides.pickupPoint, q), like(rides.destination, q), like(rides.notes, q)) as any);
+  }
+  if (filters?.routeType) conditions.push(eq(routes.routeType, filters.routeType) as any);
+  if (filters?.date) conditions.push(eq(rides.date, filters.date) as any);
+  return db.select({ ride: rides, route: routes }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).where(and(...conditions)).orderBy(rides.date, rides.time, desc(rides.createdAt));
+}
+
 export async function listJoinedPools(userId: number) {
   const db = await getDb(); if (!db) return [];
   return db.select({ pool: smartPools, route: routes }).from(smartPoolMembers).innerJoin(smartPools, eq(smartPoolMembers.smartPoolId, smartPools.id)).leftJoin(routes, eq(smartPools.routeId, routes.id)).where(eq(smartPoolMembers.userId, userId)).orderBy(desc(smartPools.createdAt));

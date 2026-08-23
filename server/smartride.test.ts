@@ -44,3 +44,19 @@ describe("multi-account auth contract", () => {
     expect(accountB).not.toHaveProperty("passwordHash");
   });
 });
+
+
+describe("ride discovery", () => {
+  it("requires an authenticated caller before searching ride matches", async () => {
+    const ctx: TrpcContext = { user: null, req: {} as TrpcContext["req"], res: {} as TrpcContext["res"] };
+    await expect(appRouter.createCaller(ctx).rides.discover({ query: "Eluru", routeType: "campus" })).rejects.toThrow();
+  });
+});
+
+
+describe("profile editing", () => {
+  it("rejects profile updates without an authenticated session", async () => {
+    const ctx: TrpcContext = { user: null, req: {} as TrpcContext["req"], res: {} as TrpcContext["res"] };
+    await expect(appRouter.createCaller(ctx).profile.update({ name: "Student", college: "SASI", routeId: null, pickupPoint: "Station" })).rejects.toThrow();
+  });
+});
