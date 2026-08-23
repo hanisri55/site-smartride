@@ -56,7 +56,7 @@
 - [x] Refine profile editing for college, route, and pickup point with persistent save feedback
 - [x] Add Vitest coverage for protected ride discovery and existing auth/profile boundaries; recovery token tests remain deferred with the email integration
 - [x] Run type-check, tests, build, and responsive visual verification
-- [ ] Save the updated project checkpoint for delivery
+- [x] Save the updated project checkpoint for delivery
 
 ## Deferred password recovery constraint
 
