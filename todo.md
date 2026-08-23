@@ -146,8 +146,8 @@
 
 ## GitHub repository export
 
-- [ ] Audit the existing source tree, Git state, target repository, and secret files
-- [ ] Ensure README.md documents SITE SmartRide, features, stack, setup, environment variables, and run commands
-- [ ] Ensure MIT LICENSE, .gitignore, and placeholder-only .env.example are present and safe
-- [ ] Validate imports, paths, type-check, tests, build, and secret exclusion
-- [ ] Commit the complete existing project as "Initial commit - SITE SmartRide" and push to site-smartride
+- [x] Audit the existing source tree, Git state, target repository, and secret files
+- [x] Ensure README.md documents SITE SmartRide, features, stack, setup, environment variables, and run commands
+- [x] Ensure MIT LICENSE, .gitignore, and placeholder-only .env.example are present and safe
+- [x] Validate imports, paths, type-check, tests, build, and secret exclusion
+- [x] Commit the complete existing project as "Initial commit - SITE SmartRide" and push to site-smartride
