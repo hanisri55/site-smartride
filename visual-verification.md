@@ -21,3 +21,17 @@ Authenticated verification: a temporary account with no created rides opened the
 Authenticated verification continued: My Rides rendered the empty journey board plus separate creator-request and sent-request panels with honest empty states. Profile rendered the persisted temporary account details, route selector, phone, study year, gender preference, verification status, pickup point, interests, bio, and save control. No runtime console output was reported during the checks.
 
 Authenticated verification completed: Notifications rendered the honest “You are up to date” empty state, and Settings rendered the 88% profile-completion indicator, pending verification state, and privacy guidance. These checks confirm protected navigation resolves to working views with meaningful empty/readiness states rather than placeholders.
+
+Regression note: after the temporary verification account was cleaned up, the preview correctly returned to the signed-out public state. The sign-in gate opened normally from the existing header, confirming logout/session clearing behavior remains intact before the next authenticated test cycle.
+
+Authenticated regression setup: a fresh temporary account was created successfully through the real signup flow, the header now shows the account name, and the signed session is active. This account is being used only to exercise persistent CRUD and request workflows, then it will be removed from the database.
+
+Authenticated regression: the Create page opened successfully and exposed both Smart Pool and Ride forms with the richer persisted vehicle, gender, contact, capacity, date, time, pickup, and notes controls. The temporary account selected SR-23 · Tanuku for the ride test.
+
+Authenticated regression: the temporary user published a real SR-23 Tanuku ride for 2026-08-24 at 08:00 from Y junction. The app persisted it, showed “Ride saved to My Rides,” and redirected to My Rides where the upcoming ride and Cancel action were visible. The test ride will be removed with the temporary account after regression.
+
+Authenticated regression: Find loaded the real persisted SR-23 ride and displayed a 50% deterministic match for Regression Student, with route, pickup, seat availability, date/time, and Request seat action. This confirms real data-backed discovery rather than placeholder matching.
+
+After restarting the dev server, the public preview loaded cleanly with the original SmartRide home composition and all primary navigation labels visible. The previous authenticated test data had already been removed; this session is used for destination verification only.
+
+Final destination verification: Impact renders the sustainability summary with current Smart Pool, student, trip, CO₂, and average-pool-size metrics. Command Center renders operational metrics and the route activity map. Both destinations opened cleanly after the final Matches fix, with current values reflecting the cleaned test database.

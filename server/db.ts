@@ -90,7 +90,8 @@ export async function listDiscoverableRides(filters?: { query?: string; routeTyp
   if (filters?.date) conditions.push(eq(rides.date, filters.date) as any);
   const rows = await db.select({ ride: rides, route: routes, creator: users }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).leftJoin(users, eq(rides.creatorId, users.id)).where(and(...conditions)).orderBy(rides.date, rides.time, desc(rides.createdAt));
   const viewer = filters?.viewerId ? (await db.select().from(users).where(eq(users.id, filters.viewerId)).limit(1))[0] : undefined;
-  return rows.map((row) => {
+  const visibleRows = filters?.viewerId ? rows.filter((row) => row.ride.creatorId !== filters.viewerId) : rows;
+  return visibleRows.map((row) => {
     let score = 40;
     const reasons: string[] = [];
     if (viewer?.routeId && viewer.routeId === row.ride.routeId) { score += 25; reasons.push("Same route"); }

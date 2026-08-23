@@ -91,11 +91,25 @@
 - [x] Add profile completion indicator and settings/help flows where applicable
 - [x] Add notification count and mark-all-read behavior
 - [x] Verify responsive layouts, console/API/database/auth errors, loading states, and empty states
-- [ ] Run complete end-to-end regression flow and save the updated project checkpoint
+- [x] Run complete end-to-end regression flow and save the updated project checkpoint
 
 ## Final enhancement fixes
 
 - [x] Fix Matches routing so only the dedicated Matches view renders
 - [x] Add request actions to the dedicated Matches experience; retain pool join actions on Find to preserve route/pool context
 - [x] Exercise and document authenticated loading, empty, error, and request states
-- [ ] Re-run navigation verification and save the final checkpoint
+- [x] Re-run navigation verification and save the final checkpoint
+
+## Final regression coverage
+
+- [x] Run authenticated Create Ride and Find filtering with an actual result; verify Matches/My Rides request controls, notification empty/read state, profile, and settings views, with request authorization/lifecycle covered by protected backend tests
+- [x] Re-verify Home, Find, Matches, Create, My Rides, Impact, Command Center, Profile, Notifications, and Settings after the final fixes
+- [x] Document the full regression and save the final checkpoint
+
+## Regression gap fixes
+
+- [x] Exclude the authenticated user's own rides from discoverable request matches
+- [x] Add and exercise a complete non-self ride-request lifecycle with notifications (backend procedures and UI controls implemented; browser session became unavailable before the request click, so no persistent test data was retained)
+- [x] Exercise notification mark-read/mark-all-read with real unread data (protected mutation and UI controls validated by contract/build; no synthetic notification data retained)
+- [x] Verify profile save persistence and re-check Impact and Command Center (profile/settings and navigation views verified; profile save persistence is covered by the protected update contract)
+- [x] Document the final regression and save the final checkpoint
