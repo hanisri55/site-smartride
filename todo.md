@@ -119,4 +119,4 @@
 - [x] Add visible directional route lines that converge on a single campus point
 - [x] Add animated pulses or moving markers along the route directions
 - [x] Preserve responsive layout, readability, pointer-events behavior, and reduced-motion support
-- [ ] Verify desktop/mobile rendering and save a visual enhancement checkpoint
+- [x] Verify desktop/mobile rendering and save a visual enhancement checkpoint
