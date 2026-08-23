@@ -69,7 +69,7 @@
 - [x] Use onboarding@resend.dev only for permitted Resend test-sender scenarios
 - [x] Keep arbitrary-user password recovery disabled unless a verified sender/domain is configured
 - [x] Document the remaining Resend production configuration requirements
-- [ ] Validate the safe configuration and save a checkpoint
+- [x] Validate the safe configuration and save a checkpoint
 
 ## Resend credential validation
 
