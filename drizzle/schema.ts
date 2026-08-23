@@ -16,6 +16,11 @@ export const users = mysqlTable("users", {
   pickupPoint: varchar("pickupPoint", { length: 255 }),
   bio: text("bio"),
   profileImage: text("profileImage"),
+  phoneNumber: varchar("phoneNumber", { length: 32 }),
+  studyYear: varchar("studyYear", { length: 32 }),
+  gender: varchar("gender", { length: 64 }),
+  genderPreference: varchar("genderPreference", { length: 64 }),
+  verificationStatus: mysqlEnum("verificationStatus", ["unverified", "pending", "verified"]).default("unverified").notNull(),
   interests: text("interests"),
   preferences: text("preferences"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -44,6 +49,9 @@ export const rides = mysqlTable("rides", {
   time: varchar("time", { length: 16 }).notNull(),
   availableSeats: int("availableSeats").notNull(),
   notes: text("notes"),
+  vehicleType: varchar("vehicleType", { length: 64 }),
+  genderPreference: varchar("genderPreference", { length: 64 }),
+  contactPreference: varchar("contactPreference", { length: 64 }),
   status: mysqlEnum("status", ["upcoming", "completed", "cancelled"]).default("upcoming").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -67,6 +75,34 @@ export const smartPoolMembers = mysqlTable("smartPoolMembers", {
   joinedAt: timestamp("joinedAt").defaultNow().notNull(),
 });
 
+export const rideRequests = mysqlTable("rideRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  rideId: int("rideId").notNull(),
+  requesterId: int("requesterId").notNull(),
+  status: mysqlEnum("status", ["pending", "accepted", "rejected", "cancelled"]).default("pending").notNull(),
+  message: text("message"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const passwordResets = mysqlTable("passwordResets", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const emailVerifications = mysqlTable("emailVerifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  verifiedAt: timestamp("verifiedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export const notifications = mysqlTable("notifications", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -83,3 +119,6 @@ export type Ride = typeof rides.$inferSelect;
 export type SmartPool = typeof smartPools.$inferSelect;
 export type SmartPoolMember = typeof smartPoolMembers.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type RideRequest = typeof rideRequests.$inferSelect;
+export type PasswordReset = typeof passwordResets.$inferSelect;
+export type EmailVerification = typeof emailVerifications.$inferSelect;

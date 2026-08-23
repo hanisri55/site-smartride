@@ -22,6 +22,13 @@
       "when": 1787414812178,
       "tag": "0002_mute_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1787462762307,
+      "tag": "0003_sweet_violations",
+      "breakpoints": true
     }
   ]
 }

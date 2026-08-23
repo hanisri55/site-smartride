@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, notifications, rides, routes, smartPoolMembers, smartPools, users } from "../drizzle/schema";
+import { InsertUser, emailVerifications, notifications, passwordResets, rideRequests, rides, routes, smartPoolMembers, smartPools, users } from "../drizzle/schema";
 import { allRouteSeeds } from "../shared/routes";
 import { ENV } from "./_core/env";
 
@@ -19,7 +19,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (!db) return;
   const values: InsertUser = { openId: user.openId };
   const updateSet: Record<string, unknown> = {};
-  for (const field of ["name", "email", "loginMethod", "dateOfBirth", "college", "course", "city", "routeId", "pickupPoint", "bio", "profileImage", "interests", "preferences"] as const) {
+  for (const field of ["name", "email", "loginMethod", "dateOfBirth", "college", "course", "city", "routeId", "pickupPoint", "bio", "profileImage", "phoneNumber", "studyYear", "gender", "genderPreference", "verificationStatus", "interests", "preferences"] as const) {
     if (user[field] !== undefined) { values[field] = user[field] as never; updateSet[field] = user[field] ?? null; }
   }
   values.lastSignedIn = user.lastSignedIn ?? new Date(); updateSet.lastSignedIn = values.lastSignedIn;
@@ -79,7 +79,7 @@ export async function listRides(userId: number) {
   return db.select({ ride: rides, route: routes }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).where(eq(rides.creatorId, userId)).orderBy(desc(rides.createdAt));
 }
 
-export async function listDiscoverableRides(filters?: { query?: string; routeType?: "campus" | "local"; date?: string }) {
+export async function listDiscoverableRides(filters?: { query?: string; routeType?: "campus" | "local"; date?: string; viewerId?: number }) {
   const db = await getDb(); if (!db) return [];
   const conditions = [eq(rides.status, "upcoming")];
   if (filters?.query) {
@@ -88,7 +88,18 @@ export async function listDiscoverableRides(filters?: { query?: string; routeTyp
   }
   if (filters?.routeType) conditions.push(eq(routes.routeType, filters.routeType) as any);
   if (filters?.date) conditions.push(eq(rides.date, filters.date) as any);
-  return db.select({ ride: rides, route: routes }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).where(and(...conditions)).orderBy(rides.date, rides.time, desc(rides.createdAt));
+  const rows = await db.select({ ride: rides, route: routes, creator: users }).from(rides).leftJoin(routes, eq(rides.routeId, routes.id)).leftJoin(users, eq(rides.creatorId, users.id)).where(and(...conditions)).orderBy(rides.date, rides.time, desc(rides.createdAt));
+  const viewer = filters?.viewerId ? (await db.select().from(users).where(eq(users.id, filters.viewerId)).limit(1))[0] : undefined;
+  return rows.map((row) => {
+    let score = 40;
+    const reasons: string[] = [];
+    if (viewer?.routeId && viewer.routeId === row.ride.routeId) { score += 25; reasons.push("Same route"); }
+    if (viewer?.pickupPoint && viewer.pickupPoint.trim().toLowerCase() === row.ride.pickupPoint.trim().toLowerCase()) { score += 20; reasons.push("Same pickup point"); }
+    if (viewer?.city && row.route?.origin && viewer.city.trim().toLowerCase() === row.route.origin.trim().toLowerCase()) { score += 10; reasons.push("Same town"); }
+    if (viewer?.genderPreference && row.ride.genderPreference && (viewer.genderPreference === "any" || viewer.genderPreference === row.ride.genderPreference)) { score += 5; reasons.push("Preference compatible"); }
+    if (row.ride.availableSeats > 0) { score += 5; reasons.push("Seats available"); }
+    return { ...row, matchScore: Math.min(99, score), matchReasons: reasons.length ? reasons : ["Route and date match"] };
+  });
 }
 
 export async function listJoinedPools(userId: number) {
@@ -109,6 +120,57 @@ export async function createNotification(userId: number, type: string, message: 
   await db.insert(notifications).values({ userId, type, message });
 }
 
+export async function createRideRequest(input: { rideId: number; requesterId: number; message?: string }) {
+  const db = await getDb(); if (!db) throw new Error("Database unavailable");
+  const existing = await db.select().from(rideRequests).where(and(eq(rideRequests.rideId, input.rideId), eq(rideRequests.requesterId, input.requesterId))).limit(1);
+  if (existing.length) throw new Error("You already requested this ride");
+  const result = await db.insert(rideRequests).values(input);
+  return Number(result[0].insertId);
+}
+
+export async function listRideRequestsForRequester(userId: number) {
+  const db = await getDb(); if (!db) return [];
+  return db.select({ request: rideRequests, ride: rides, route: routes }).from(rideRequests).innerJoin(rides, eq(rideRequests.rideId, rides.id)).leftJoin(routes, eq(rides.routeId, routes.id)).where(eq(rideRequests.requesterId, userId)).orderBy(desc(rideRequests.createdAt));
+}
+
+export async function listRideRequestsForCreator(userId: number) {
+  const db = await getDb(); if (!db) return [];
+  const rows = await db.select({ request: rideRequests, ride: rides, route: routes }).from(rideRequests).innerJoin(rides, eq(rideRequests.rideId, rides.id)).leftJoin(routes, eq(rides.routeId, routes.id)).where(eq(rides.creatorId, userId)).orderBy(desc(rideRequests.createdAt));
+  return Promise.all(rows.map(async (item) => ({ ...item, requester: (await db.select().from(users).where(eq(users.id, item.request.requesterId)).limit(1))[0] })));
+
+}
+
+export async function getRideRequest(id: number) {
+  const db = await getDb(); if (!db) return undefined;
+  return (await db.select({ request: rideRequests, ride: rides }).from(rideRequests).innerJoin(rides, eq(rideRequests.rideId, rides.id)).where(eq(rideRequests.id, id)).limit(1))[0];
+}
+
+export async function createPasswordReset(userId: number, tokenHash: string, expiresAt: Date) {
+  const db = await getDb(); if (!db) throw new Error("Database unavailable");
+  await db.update(passwordResets).set({ usedAt: new Date() }).where(and(eq(passwordResets.userId, userId), eq(passwordResets.usedAt, null as any)));
+  await db.insert(passwordResets).values({ userId, tokenHash, expiresAt });
+}
+
+export async function getPasswordReset(tokenHash: string) {
+  const db = await getDb(); if (!db) return undefined;
+  return (await db.select().from(passwordResets).where(eq(passwordResets.tokenHash, tokenHash)).limit(1))[0];
+}
+
+export async function consumePasswordReset(id: number) {
+  const db = await getDb(); if (!db) throw new Error("Database unavailable");
+  await db.update(passwordResets).set({ usedAt: new Date() }).where(eq(passwordResets.id, id));
+}
+
+export async function createEmailVerification(userId: number, tokenHash: string, expiresAt: Date) {
+  const db = await getDb(); if (!db) throw new Error("Database unavailable");
+  await db.insert(emailVerifications).values({ userId, tokenHash, expiresAt });
+}
+
+export async function getEmailVerification(tokenHash: string) {
+  const db = await getDb(); if (!db) return undefined;
+  return (await db.select().from(emailVerifications).where(eq(emailVerifications.tokenHash, tokenHash)).limit(1))[0];
+}
+
 export async function getImpact() {
   const db = await getDb(); if (!db) return { pools: 0, students: 0, tripsReduced: 0, co2Saved: 0, averagePoolSize: 0, popularRoute: "—" };
   const pools = await db.select().from(smartPools);
@@ -119,4 +181,4 @@ export async function getImpact() {
   return { pools: pools.length, students: members.length, tripsReduced, co2Saved: tripsReduced * 2.4, averagePoolSize: pools.length ? Math.round((members.length / pools.length) * 10) / 10 : 0, popularRoute: popular?.routeNumber ?? "—" };
 }
 
-export { notifications, rides, routes, smartPoolMembers, smartPools, users };
+export { emailVerifications, notifications, passwordResets, rideRequests, rides, routes, smartPoolMembers, smartPools, users };

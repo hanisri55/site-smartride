@@ -76,3 +76,26 @@
 - [x] Validate the newly supplied Resend API key through the server-side environment only
 - [x] Keep onboarding@resend.dev restricted to permitted test-sender use
 - [x] Keep arbitrary-user password recovery gated until a verified domain sender is configured
+
+## SITE SmartRide enhancement specification
+
+- [x] Add restrained premium campus-mobility background motion with reduced-motion support
+- [x] Verify every existing navigation destination opens a working non-placeholder view
+- [x] Extend user/profile persistence with phone, year, gender, gender preference, verification status, and photo metadata
+- [x] Implement explicit user verification state and verified badge without random verification
+- [x] Expand Find Ride inputs and real stored-data match scoring with explanations and availability
+- [x] Expand Create Ride persistence with vehicle, gender, and contact preferences
+- [x] Add Ride Matches view with deterministic scoring and request actions; Smart Pool joins remain on Find where pool context is available
+- [x] Add persistent ride-request lifecycle with accept, reject, cancel, and notifications
+- [x] Expand My Rides with details, matched students, and request management
+- [x] Add profile completion indicator and settings/help flows where applicable
+- [x] Add notification count and mark-all-read behavior
+- [x] Verify responsive layouts, console/API/database/auth errors, loading states, and empty states
+- [ ] Run complete end-to-end regression flow and save the updated project checkpoint
+
+## Final enhancement fixes
+
+- [x] Fix Matches routing so only the dedicated Matches view renders
+- [x] Add request actions to the dedicated Matches experience; retain pool join actions on Find to preserve route/pool context
+- [x] Exercise and document authenticated loading, empty, error, and request states
+- [ ] Re-run navigation verification and save the final checkpoint
