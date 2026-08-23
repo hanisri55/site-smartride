@@ -120,3 +120,10 @@
 - [x] Add animated pulses or moving markers along the route directions
 - [x] Preserve responsive layout, readability, pointer-events behavior, and reduced-motion support
 - [x] Verify desktop/mobile rendering and save a visual enhancement checkpoint
+
+## Refined campus network background
+
+- [x] Replace the low-contrast route overlay with a stronger layered visual treatment
+- [x] Add clearly visible arcs, origin nodes, central campus hub, and attractive motion
+- [x] Preserve hero readability, responsive composition, pointer-event isolation, and reduced-motion support
+- [x] Run visual verification and save the refined background checkpoint
