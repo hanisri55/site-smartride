@@ -113,3 +113,10 @@
 - [x] Exercise notification mark-read/mark-all-read with real unread data (protected mutation and UI controls validated by contract/build; no synthetic notification data retained)
 - [x] Verify profile save persistence and re-check Impact and Command Center (profile/settings and navigation views verified; profile save persistence is covered by the protected update contract)
 - [x] Document the final regression and save the final checkpoint
+
+## Converging mobility background
+
+- [x] Add visible directional route lines that converge on a single campus point
+- [x] Add animated pulses or moving markers along the route directions
+- [x] Preserve responsive layout, readability, pointer-events behavior, and reduced-motion support
+- [ ] Verify desktop/mobile rendering and save a visual enhancement checkpoint

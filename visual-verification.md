@@ -35,3 +35,5 @@ Authenticated regression: Find loaded the real persisted SR-23 ride and displaye
 After restarting the dev server, the public preview loaded cleanly with the original SmartRide home composition and all primary navigation labels visible. The previous authenticated test data had already been removed; this session is used for destination verification only.
 
 Final destination verification: Impact renders the sustainability summary with current Smart Pool, student, trip, CO₂, and average-pool-size metrics. Command Center renders operational metrics and the route activity map. Both destinations opened cleanly after the final Matches fix, with current values reflecting the cleaned test database.
+
+Converging route background verification: desktop shows five thin cyan directional paths entering a shared campus beacon with moving luminous pulses and a SASI CAMPUS label, while existing hero content remains readable. Mobile shows the network curves and route activity behind the hero and forecast card without horizontal overflow; the effect is intentionally softer at the mobile breakpoint. Reduced-motion CSS disables pulse travel and dash animation.
