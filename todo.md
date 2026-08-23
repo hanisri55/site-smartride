@@ -127,3 +127,19 @@
 - [x] Add clearly visible arcs, origin nodes, central campus hub, and attractive motion
 - [x] Preserve hero readability, responsive composition, pointer-event isolation, and reduced-motion support
 - [x] Run visual verification and save the refined background checkpoint
+
+## SITE SmartRide smart-mobility background
+
+- [x] Add a subtle campus-map layer with faint roads, curved routes, GPS nodes, route labels, and moving route dots
+- [x] Add restrained vehicle silhouettes, slow gradient blobs, and occasional radar pulses
+- [x] Render floating mobility indicators only from real application data when available; never invent users or percentages
+- [x] Preserve existing content, functionality, routes, database logic, readability, responsiveness, pointer-event isolation, and reduced-motion support
+- [x] Run type-check/tests/build and desktop/mobile visual verification, then save a checkpoint
+
+## SITE SmartRide smart-mobility background
+
+- [x] Add a subtle campus-map layer with faint roads, curved routes, GPS nodes, route labels, and moving route dots
+- [x] Add restrained vehicle silhouettes, slow gradient blobs, and occasional radar pulses
+- [x] Render floating mobility indicators only from real application data when available; never invent users or percentages
+- [x] Preserve existing content, functionality, routes, database logic, readability, responsiveness, pointer-event isolation, and reduced-motion support
+- [x] Run type-check/tests/build and desktop/mobile visual verification, then save a checkpoint
