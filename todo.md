@@ -143,3 +143,11 @@
 - [x] Render floating mobility indicators only from real application data when available; never invent users or percentages
 - [x] Preserve existing content, functionality, routes, database logic, readability, responsiveness, pointer-event isolation, and reduced-motion support
 - [x] Run type-check/tests/build and desktop/mobile visual verification, then save a checkpoint
+
+## GitHub repository export
+
+- [ ] Audit the existing source tree, Git state, target repository, and secret files
+- [ ] Ensure README.md documents SITE SmartRide, features, stack, setup, environment variables, and run commands
+- [ ] Ensure MIT LICENSE, .gitignore, and placeholder-only .env.example are present and safe
+- [ ] Validate imports, paths, type-check, tests, build, and secret exclusion
+- [ ] Commit the complete existing project as "Initial commit - SITE SmartRide" and push to site-smartride
