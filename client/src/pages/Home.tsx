@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import {
   ArrowRight,
   Award,
@@ -240,17 +241,67 @@ function AssistantPage() { const [messages, setMessages] = useState<string[]>([]
 
 function EvaluationPage() { const groups = [["Skill extraction", ["Precision", "Recall", "F1 Score"]], ["Job matching", ["Precision@K", "Recall@K", "NDCG@K"]], ["Adaptive assessment", ["Assessment reliability", "Prediction accuracy"]], ["Recommendation engine", ["Recommendation relevance", "Skill improvement rate"]], ["RAG", ["Retrieval accuracy", "Recall@K", "Response grounding"]]]; return <div><Card className="bg-[#f8f7ff] p-6 sm:p-7"><div className="flex items-start gap-4"><div className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-[#6c5ce7] text-white"><ShieldCheck size={21} /></div><div><Pill tone="violet">Transparent by design</Pill><h2 className="mt-4 font-display text-2xl font-bold tracking-[-.04em] text-[#372e86]">Evaluation metrics will be populated after model testing.</h2><p className="mt-3 max-w-[670px] text-sm leading-6 text-[#625d91]">SkillBridge does not fabricate performance numbers. This page is structured for offline benchmark results, error analysis, and ongoing model monitoring once the intelligence layer is connected.</p></div></div></Card><div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{groups.map(([name, metrics]) => <Card key={name as string} className="p-5"><div className="text-[10px] font-bold uppercase tracking-[.15em] text-[#9299aa]">{name as string}</div><div className="mt-4 grid gap-2">{(metrics as string[]).map(metric => <div key={metric} className="flex items-center justify-between rounded-[10px] bg-[#f8f9fc] px-3 py-2.5"><span className="text-xs font-bold text-[#68738a]">{metric}</span><span className="text-[10px] font-bold text-[#b0b6c4]">Pending</span></div>)}</div></Card>)}</div><Card className="mt-6 p-6"><SectionHeading title="Evaluation principles" eyebrow="How trust gets built" /><div className="grid gap-4 md:grid-cols-3">{[["Grounded", "Recommendations should cite profile and job evidence."], ["Calibrated", "Confidence should reflect demonstrated skill, not only claims."], ["Helpful", "Success means measurable user progress, not engagement alone."]].map(([title, body]) => <div key={title} className="rounded-[13px] border border-[#eef0f5] p-4"><div className="font-display font-bold text-[#28344f]">{title}</div><div className="mt-2 text-xs leading-5 text-[#8991a4]">{body}</div></div>)}</div></Card></div>; }
 
+const routeToPage: Record<string, Page> = {
+  "/dashboard": "overview",
+  "/profile": "profile",
+  "/skills": "skills",
+  "/assessment": "assessment",
+  "/assessment/results": "assessment",
+  "/resume-analysis": "skills",
+  "/jobs": "jobs",
+  "/jobs/1": "jobs",
+  "/career-readiness": "overview",
+  "/skill-impact": "growth",
+  "/roadmap": "growth",
+  "/skill-gaps": "skills",
+  "/analytics": "analytics",
+  "/job-market": "analytics",
+  "/assistant": "assistant",
+  "/notifications": "notifications",
+  "/settings": "profile",
+  "/evaluation": "evaluation",
+};
+
+const pageToRoute: Record<Page, string> = {
+  overview: "/dashboard",
+  skills: "/skills",
+  assessment: "/assessment",
+  jobs: "/jobs",
+  growth: "/roadmap",
+  analytics: "/analytics",
+  profile: "/profile",
+  notifications: "/notifications",
+  assistant: "/assistant",
+  evaluation: "/evaluation",
+};
+
 export default function Home() {
+  const [location, navigate] = useLocation();
+  const routePage = routeToPage[location] ?? "overview";
   const [screen, setScreen] = useState<"landing" | "auth" | "onboarding" | "app">("landing");
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
-  const [page, setPage] = useState<Page>("overview");
+  const [page, setPage] = useState<Page>(routePage);
   const [mobileOpen, setMobileOpen] = useState(false);
-  useEffect(() => { const saved = window.localStorage.getItem("skillbridge-demo-screen"); if (saved === "app") setScreen("app"); }, []);
-  const start = () => { setAuthMode("signup"); setScreen("auth"); };
-  const completeOnboarding = () => { window.localStorage.setItem("skillbridge-demo-screen", "app"); setScreen("app"); };
-  const logout = () => { window.localStorage.removeItem("skillbridge-demo-screen"); setScreen("landing"); setPage("overview"); };
+  useEffect(() => {
+    const saved = window.localStorage.getItem("skillbridge-demo-screen");
+    if (["/login", "/register", "/forgot-password"].includes(location)) {
+      setScreen("auth");
+      setAuthMode(location === "/login" ? "login" : "signup");
+    } else if (location === "/onboarding") {
+      setScreen("onboarding");
+    } else if (saved === "app" || location !== "/") {
+      setScreen("app");
+    } else {
+      setScreen("landing");
+    }
+  }, [location]);
+  useEffect(() => { setPage(routePage); }, [routePage]);
+  useEffect(() => { if (screen === "app") { const target = pageToRoute[page]; if (location !== target) navigate(target); } }, [screen, page, location, navigate]);
+  const start = () => { setAuthMode("signup"); setScreen("auth"); navigate("/register"); };
+  const completeOnboarding = () => { window.localStorage.setItem("skillbridge-demo-screen", "app"); setScreen("app"); navigate("/dashboard"); };
+  const logout = () => { window.localStorage.removeItem("skillbridge-demo-screen"); setScreen("landing"); setPage("overview"); navigate("/"); };
   if (screen === "landing") return <Landing onStart={start} />;
-  if (screen === "auth") return <><Landing onStart={start} /><AuthModal mode={authMode} setMode={setAuthMode} onContinue={() => authMode === "signup" ? setScreen("onboarding") : setScreen("app")} onClose={() => setScreen("landing")} /></>;
+  if (screen === "auth") return <><Landing onStart={start} /><AuthModal mode={authMode} setMode={setAuthMode} onContinue={() => authMode === "signup" ? (setScreen("onboarding"), navigate("/onboarding")) : (setScreen("app"), navigate("/dashboard"))} onClose={() => { setScreen("landing"); navigate("/"); }} /></>;
   if (screen === "onboarding") return <Onboarding onComplete={completeOnboarding} />;
   const meta = pageTitles[page];
   return <div className="min-h-screen bg-[#fbfbfd] text-[#17223d]"><div className="flex min-h-screen"><Sidebar page={page} setPage={setPage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} /><div className="min-w-0 flex-1"><Topbar title={page === "overview" ? "Overview" : meta.title} onMenu={() => setMobileOpen(true)} onNotifications={() => setPage("notifications")} onAssistant={() => setPage("assistant")} /><main className="mx-auto max-w-[1400px] px-5 py-7 lg:px-8 lg:py-9"><div className="mb-7"><div className="text-[10px] font-bold uppercase tracking-[.18em] text-[#7c8499]">{meta.eyebrow}</div><div className="mt-2 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><h1 className="font-display text-[30px] font-bold tracking-[-.055em] text-[#17223d] sm:text-[36px]">{meta.title}</h1><p className="mt-2 max-w-[700px] text-sm leading-6 text-[#727c91]">{meta.description}</p></div>{page === "overview" && <Pill tone="mint"><span className="h-1.5 w-1.5 rounded-full bg-[#29ba7b]" /> Profile synced 2h ago</Pill>}</div></div>{page === "overview" && <DashboardHome setPage={setPage} />}{page === "skills" && <SkillsPage setPage={setPage} />}{page === "assessment" && <AssessmentPage />}{page === "jobs" && <JobsPage />}{page === "growth" && <GrowthPage />}{page === "analytics" && <AnalyticsPage />}{page === "profile" && <ProfilePage />}{page === "notifications" && <NotificationsPage />}{page === "assistant" && <AssistantPage />}{page === "evaluation" && <EvaluationPage />}</main></div></div></div>;
