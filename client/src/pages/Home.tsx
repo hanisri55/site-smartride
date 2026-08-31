@@ -299,7 +299,7 @@ export default function Home() {
     }
   }, [appPath]);
   useEffect(() => { setPage(routePage); }, [routePage]);
-  useEffect(() => { if (screen === "app") { const target = pageToRoute[page]; if (appPath !== target) go(target); } }, [screen, page, appPath, basePath]);
+  useEffect(() => { if (screen === "app") { const target = page === "jobs" && appPath.startsWith("/jobs/") ? appPath : pageToRoute[page]; if (appPath !== target) go(target); } }, [screen, page, appPath, basePath]);
   const start = () => { setAuthMode("signup"); setScreen("auth"); go("/register"); };
   const completeOnboarding = () => { window.localStorage.setItem("skillbridge-demo-screen", "app"); setScreen("app"); go("/dashboard"); };
   const logout = () => { window.localStorage.removeItem("skillbridge-demo-screen"); setScreen("landing"); setPage("overview"); go("/"); };
