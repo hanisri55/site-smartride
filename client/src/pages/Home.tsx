@@ -277,31 +277,34 @@ const pageToRoute: Record<Page, string> = {
 
 export default function Home() {
   const [location, navigate] = useLocation();
-  const routePage = routeToPage[location] ?? "overview";
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const appPath = basePath && location.startsWith(basePath) ? location.slice(basePath.length) || "/" : location;
+  const go = (path: string) => navigate(`${basePath}${path === "/" ? "/" : path}`);
+  const routePage = routeToPage[appPath] ?? "overview";
   const [screen, setScreen] = useState<"landing" | "auth" | "onboarding" | "app">("landing");
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [page, setPage] = useState<Page>(routePage);
   const [mobileOpen, setMobileOpen] = useState(false);
   useEffect(() => {
     const saved = window.localStorage.getItem("skillbridge-demo-screen");
-    if (["/login", "/register", "/forgot-password"].includes(location)) {
+    if (["/login", "/register", "/forgot-password"].includes(appPath)) {
       setScreen("auth");
-      setAuthMode(location === "/login" ? "login" : "signup");
-    } else if (location === "/onboarding") {
+      setAuthMode(appPath === "/login" ? "login" : "signup");
+    } else if (appPath === "/onboarding") {
       setScreen("onboarding");
-    } else if (saved === "app" || location !== "/") {
+    } else if (saved === "app" || appPath !== "/") {
       setScreen("app");
     } else {
       setScreen("landing");
     }
-  }, [location]);
+  }, [appPath]);
   useEffect(() => { setPage(routePage); }, [routePage]);
-  useEffect(() => { if (screen === "app") { const target = pageToRoute[page]; if (location !== target) navigate(target); } }, [screen, page, location, navigate]);
-  const start = () => { setAuthMode("signup"); setScreen("auth"); navigate("/register"); };
-  const completeOnboarding = () => { window.localStorage.setItem("skillbridge-demo-screen", "app"); setScreen("app"); navigate("/dashboard"); };
-  const logout = () => { window.localStorage.removeItem("skillbridge-demo-screen"); setScreen("landing"); setPage("overview"); navigate("/"); };
+  useEffect(() => { if (screen === "app") { const target = pageToRoute[page]; if (appPath !== target) go(target); } }, [screen, page, appPath, basePath]);
+  const start = () => { setAuthMode("signup"); setScreen("auth"); go("/register"); };
+  const completeOnboarding = () => { window.localStorage.setItem("skillbridge-demo-screen", "app"); setScreen("app"); go("/dashboard"); };
+  const logout = () => { window.localStorage.removeItem("skillbridge-demo-screen"); setScreen("landing"); setPage("overview"); go("/"); };
   if (screen === "landing") return <Landing onStart={start} />;
-  if (screen === "auth") return <><Landing onStart={start} /><AuthModal mode={authMode} setMode={setAuthMode} onContinue={() => authMode === "signup" ? (setScreen("onboarding"), navigate("/onboarding")) : (setScreen("app"), navigate("/dashboard"))} onClose={() => { setScreen("landing"); navigate("/"); }} /></>;
+  if (screen === "auth") return <><Landing onStart={start} /><AuthModal mode={authMode} setMode={setAuthMode} onContinue={() => authMode === "signup" ? (setScreen("onboarding"), go("/onboarding")) : (setScreen("app"), go("/dashboard"))} onClose={() => { setScreen("landing"); go("/"); }} /></>;
   if (screen === "onboarding") return <Onboarding onComplete={completeOnboarding} />;
   const meta = pageTitles[page];
   return <div className="min-h-screen bg-[#fbfbfd] text-[#17223d]"><div className="flex min-h-screen"><Sidebar page={page} setPage={setPage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} /><div className="min-w-0 flex-1"><Topbar title={page === "overview" ? "Overview" : meta.title} onMenu={() => setMobileOpen(true)} onNotifications={() => setPage("notifications")} onAssistant={() => setPage("assistant")} /><main className="mx-auto max-w-[1400px] px-5 py-7 lg:px-8 lg:py-9"><div className="mb-7"><div className="text-[10px] font-bold uppercase tracking-[.18em] text-[#7c8499]">{meta.eyebrow}</div><div className="mt-2 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><h1 className="font-display text-[30px] font-bold tracking-[-.055em] text-[#17223d] sm:text-[36px]">{meta.title}</h1><p className="mt-2 max-w-[700px] text-sm leading-6 text-[#727c91]">{meta.description}</p></div>{page === "overview" && <Pill tone="mint"><span className="h-1.5 w-1.5 rounded-full bg-[#29ba7b]" /> Profile synced 2h ago</Pill>}</div></div>{page === "overview" && <DashboardHome setPage={setPage} />}{page === "skills" && <SkillsPage setPage={setPage} />}{page === "assessment" && <AssessmentPage />}{page === "jobs" && <JobsPage />}{page === "growth" && <GrowthPage />}{page === "analytics" && <AnalyticsPage />}{page === "profile" && <ProfilePage />}{page === "notifications" && <NotificationsPage />}{page === "assistant" && <AssistantPage />}{page === "evaluation" && <EvaluationPage />}</main></div></div></div>;
