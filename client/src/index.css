@@ -3,87 +3,36 @@
 @import "tw-animate-css";
 
 :root {
-  --background: 222 47% 8%;
-  --foreground: 210 40% 96%;
-  --card: 222 37% 12%;
-  --card-foreground: 210 40% 96%;
-  --popover: 222 37% 12%;
-  --popover-foreground: 210 40% 96%;
-  --primary: 178 85% 52%;
-  --primary-foreground: 222 47% 8%;
-  --secondary: 217 28% 17%;
-  --secondary-foreground: 210 40% 96%;
-  --muted: 217 24% 16%;
-  --muted-foreground: 215 20% 67%;
-  --accent: 196 81% 52%;
-  --accent-foreground: 222 47% 8%;
-  --destructive: 0 72% 62%;
-  --border: 215 24% 22%;
-  --input: 215 24% 22%;
-  --ring: 178 85% 52%;
-  --radius: 1rem;
+  --background: 240 20% 99%;
+  --foreground: 225 41% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 225 41% 16%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 225 41% 16%;
+  --primary: 247 72% 63%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 17% 96%;
+  --secondary-foreground: 225 41% 16%;
+  --muted: 240 17% 96%;
+  --muted-foreground: 221 18% 50%;
+  --accent: 157 70% 73%;
+  --accent-foreground: 225 41% 16%;
+  --destructive: 350 78% 66%;
+  --border: 228 20% 91%;
+  --input: 228 20% 91%;
+  --ring: 247 72% 63%;
+  --radius: 0.8rem;
 }
 
 * { border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; }
-body { margin: 0; min-width: 320px; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'DM Sans', sans-serif; }
-h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
-button, a { transition: transform 160ms cubic-bezier(.23,1,.32,1), opacity 160ms ease, background-color 160ms ease, border-color 160ms ease; }
-button:active, a:active { transform: scale(.97); }
+body { margin: 0; min-width: 320px; background: #fbfbfd; color: #17223d; font-family: 'DM Sans', sans-serif; }
+button, a, input, select { transition: transform 160ms cubic-bezier(.23,1,.32,1), opacity 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease; }
+button:active, a:active { transform: scale(.98); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(108,92,231,.24); outline-offset: 2px; }
+.font-display, h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
 
-.app-shell { position: relative; isolation: isolate; overflow: hidden; }
-.network-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: radial-gradient(ellipse at 68% 30%, rgba(20,198,191,.14), transparent 34%), radial-gradient(circle at 6% 38%, rgba(43,108,220,.12), transparent 30%), radial-gradient(circle at 92% 78%, rgba(33,220,204,.08), transparent 28%), linear-gradient(180deg, rgba(7,16,34,.04), rgba(7,16,34,.92) 90%); }
-.network-bg::before { content: ''; position: absolute; inset: 0; opacity: .16; background-image: linear-gradient(rgba(112,170,210,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(112,170,210,.1) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 65% 31%, black 0 28%, transparent 78%); }
-.network-bg::after { content: ''; position: absolute; width: 78vw; height: 48vw; right: -18vw; top: 8rem; border: 1px solid rgba(73,244,222,.16); border-radius: 48%; transform: rotate(-16deg); box-shadow: 0 0 0 28px rgba(46,232,215,.045), 0 0 0 70px rgba(46,232,215,.025), 0 0 100px rgba(46,232,215,.1); animation: drift 18s ease-in-out infinite alternate; }
-@keyframes drift { from { transform: rotate(-16deg) translate3d(0,0,0); } to { transform: rotate(-11deg) translate3d(-2%, 2%, 0); } }
-.network-orbit { position: absolute; left: 42%; top: 11rem; width: 46rem; height: 27rem; border: 1px solid rgba(105,249,228,.12); border-radius: 50%; transform: rotate(-18deg); box-shadow: inset 0 0 40px rgba(82,239,220,.035), 0 0 35px rgba(53,205,202,.04); animation: orbit-drift 16s ease-in-out infinite alternate; }
-.orbit-two { left: 46%; top: 15rem; width: 38rem; height: 21rem; transform: rotate(18deg); border-color: rgba(124,220,255,.13); animation-delay: -4s; }
-@keyframes orbit-drift { to { transform: rotate(-11deg) translate3d(-1.5rem, 1rem, 0); } }
-.orbit-two { animation-name: orbit-drift-two; }
-@keyframes orbit-drift-two { to { transform: rotate(24deg) translate3d(1rem, -1rem, 0); } }
-.network-glow { position: absolute; width: 25rem; height: 25rem; border-radius: 50%; filter: blur(46px); opacity: .11; background: #2ce5d4; animation: blob-drift 20s ease-in-out infinite alternate; }
-.glow-one { left: 49%; top: 10rem; }
-.glow-two { right: -8rem; bottom: 8rem; width: 20rem; height: 20rem; background: #318cff; opacity: .08; animation-delay: -7s; }
-.glow-three { left: -10rem; bottom: 24rem; width: 18rem; height: 18rem; background: #63e6be; opacity: .07; animation-delay: -12s; }
-@keyframes blob-drift { to { transform: translate3d(2rem, -1.5rem, 0) scale(1.08); } }
-.route-network { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 42rem; opacity: .92; overflow: visible; filter: drop-shadow(0 0 5px rgba(74,241,220,.14)); }
-.map-roads path { stroke: rgba(126,178,211,.13); stroke-width: 1; stroke-dasharray: 2 12; }
-.route-paths path { stroke-linecap: round; stroke-width: 1.6; stroke-dasharray: 4 18; animation: route-flow 13s linear infinite; }
-.route-paths path:nth-child(2) { animation-delay: -2.5s; opacity: .82; }
-.route-paths path:nth-child(3) { animation-delay: -5s; opacity: .88; }
-.route-paths path:nth-child(4) { animation-delay: -8s; opacity: .76; }
-.route-paths path:nth-child(5) { animation-delay: -10s; opacity: .84; }
-.route-pulses circle { opacity: .78; }
-.route-vehicles { opacity: .5; filter: drop-shadow(0 0 4px rgba(135,255,235,.75)); }
-.route-vehicles rect { fill: #b8f8ee; }
-.route-vehicles circle { fill: #6acdc4; }
-.campus-beacon { filter: drop-shadow(0 0 12px rgba(86,255,225,.6)); }
-.campus-beacon .beacon-aura { fill: rgba(75,242,220,.05); stroke: rgba(116,255,233,.24); stroke-width: 1.4; animation: beacon-aura 3.2s ease-out infinite; }
-.campus-beacon .beacon-ring { fill: rgba(75,242,220,.05); stroke: rgba(116,255,233,.62); stroke-width: 1.5; animation: beacon-ring 3.2s ease-out infinite; }
-.campus-beacon .beacon-core { fill: #c8fff5; filter: drop-shadow(0 0 10px rgba(86,255,225,.9)); }
-.campus-beacon path { stroke: rgba(180,255,245,.38); stroke-width: 1; stroke-dasharray: 3 6; }
-@keyframes route-flow { to { stroke-dashoffset: -220; } }
-@keyframes beacon-ring { 0%, 100% { opacity: .25; transform: scale(.82); } 55% { opacity: .8; transform: scale(1.16); } }
-@keyframes beacon-aura { 0%, 100% { opacity: .12; transform: scale(.78); } 55% { opacity: .4; transform: scale(1.08); } }
-.network-node { position: absolute; width: 7px; height: 7px; border-radius: 999px; background: #79ffea; border: 1px solid rgba(208,255,249,.65); box-shadow: 0 0 0 5px rgba(44,229,212,.09), 0 0 16px rgba(44,229,212,.7); animation: pulse 4.5s ease-in-out infinite; }
-.node-nidadavole { left: 8%; top: 14%; } .node-tanuku { left: 82%; top: 6%; } .node-attili { left: 88%; top: 70%; } .node-bhimavaram { left: 8%; top: 79%; } .node-tadepalligudem { left: 42%; top: 4%; }
-@keyframes pulse { 50% { opacity: .46; transform: scale(.76); } }
-.radar-pulse { position: absolute; width: 18px; height: 18px; border: 1px solid rgba(104,239,224,.5); border-radius: 50%; animation: radar 6s ease-out infinite; }
-.radar-one { left: 8%; top: 14%; } .radar-two { left: 82%; top: 6%; animation-delay: -3s; }
-@keyframes radar { 0% { opacity: .55; transform: scale(.55); } 70%, 100% { opacity: 0; transform: scale(2.8); } }
-.map-label { position: absolute; color: rgba(154,205,219,.46); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; text-shadow: 0 0 12px rgba(68,206,197,.25); }
-.map-label b { color: rgba(180,250,239,.58); font-weight: 600; }
-.label-nidadavole { left: 9%; top: 10%; } .label-tanuku { left: 73%; top: 12%; } .label-attili { left: 78%; top: 74%; } .label-bhimavaram { left: 10%; top: 83%; } .label-tadepalligudem { left: 43%; top: 8%; }
-.network-data-pods { position: absolute; right: 4%; top: 13rem; display: flex; gap: 8px; opacity: .52; color: rgba(168,203,215,.58); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
-.network-data-pods span { border: 1px solid rgba(143,199,211,.16); border-radius: 999px; background: rgba(7,18,35,.26); padding: 6px 8px; backdrop-filter: blur(8px); }
-.network-data-pods b { color: rgba(184,255,243,.78); font-size: 11px; margin-right: 3px; }
-.campus-label { position: absolute; left: 69%; top: 42%; color: rgba(191,255,246,.65); font-size: 9px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; text-shadow: 0 0 14px rgba(79,255,231,.4); transform: translate(18px, 16px); white-space: nowrap; }
-.glass { background: linear-gradient(135deg, rgba(22,36,61,.78), rgba(12,24,44,.58)); border: 1px solid rgba(144,183,211,.16); box-shadow: 0 20px 60px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.05); backdrop-filter: blur(18px); }
-.eyebrow { color: #75f5df; font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
-.route-line { position: relative; }
-.route-line::before { content: ''; position: absolute; left: 9px; top: 22px; bottom: -18px; width: 1px; background: linear-gradient(#2ce5d4, rgba(44,229,212,0)); }
-.route-line:last-child::before { display: none; }
-.metric-number { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: -.06em; }
-
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } .route-pulses, .route-vehicles, .radar-pulse { display: none; } .route-paths path, .network-orbit, .network-glow { animation: none; } .route-paths path { stroke-dasharray: 2 16; } }
-@media (max-width: 768px) { .network-bg::after { width: 150vw; height: 100vw; right: -55vw; top: 12rem; } .network-orbit { left: 8%; top: 16rem; width: 34rem; height: 22rem; opacity: .65; } .orbit-two { left: 14%; top: 19rem; width: 29rem; height: 18rem; } .network-glow { left: 29%; top: 15rem; width: 18rem; height: 18rem; } .route-network { min-height: 52rem; opacity: .78; } .map-label { font-size: 7px; } .label-tanuku { left: 68%; } .label-attili { left: 68%; } .label-bhimavaram { left: 6%; } .label-tadepalligudem { left: 34%; } .network-data-pods { right: 3%; top: 18rem; gap: 4px; transform: scale(.8); transform-origin: right top; } .network-data-pods span:nth-child(3) { display: none; } .campus-label { left: 60%; top: 40%; font-size: 8px; } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
