@@ -81,6 +81,7 @@ const defaultStore = (): Store => ({
 function loadStore(): Store { try { const saved = localStorage.getItem('finora-store'); return saved ? { ...defaultStore(), ...JSON.parse(saved) } : defaultStore(); } catch { return defaultStore(); } }
 function cx(...values: Array<string | false | undefined>) { return values.filter(Boolean).join(' '); }
 function Icon({ icon: I, size = 18 }: { icon: IconType; size?: number }) { return <I size={size} strokeWidth={1.8} />; }
+async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> { const userId = localStorage.getItem('finora-user-id') || 'demo-user'; const response = await fetch(path, { ...init, headers: { 'Content-Type': 'application/json', 'X-Finora-User': userId, ...(init?.headers || {}) } }); if (!response.ok) throw new Error(await response.text()); return response.json() as Promise<T>; }
 
 function App() {
   const [store, setStore] = useState<Store>(loadStore);
@@ -91,13 +92,17 @@ function App() {
   const [editing, setEditing] = useState<Transaction | Budget | GoalItem | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
+  const [backendLabel, setBackendLabel] = useState('Local demo workspace');
 
   useEffect(() => { localStorage.setItem('finora-store', JSON.stringify(store)); document.documentElement.dataset.theme = store.theme; }, [store]);
+  useEffect(() => { if (!backendReady) return; apiRequest('/api/state', { method: 'POST', body: JSON.stringify({ store }) }).catch(() => setBackendLabel('Local demo workspace')); }, [store, backendReady]);
+  useEffect(() => { let active = true; apiRequest<{ ok: boolean; store: Store | null; user: Profile & { id: string } }>('/api/bootstrap').then(result => { if (!active) return; setStore(result.store ? { ...defaultStore(), ...result.store } : defaultStore()); localStorage.setItem('finora-user-id', result.user.id || 'demo-user'); setBackendReady(true); setBackendLabel('MySQL workspace'); }).catch(() => { if (active) setBackendLabel('Local demo workspace'); }); return () => { active = false; }; }, []);
   useEffect(() => { const sync = () => setView((window.location.pathname.replace('/', '') as View) || 'dashboard'); window.addEventListener('popstate', sync); return () => window.removeEventListener('popstate', sync); }, []);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(null), 3000); return () => window.clearTimeout(timer); }, [toast]);
 
   const navigate = (next: View | '/') => { const path = next === '/' ? '/' : `/${next}`; window.history.pushState({}, '', path); setView(next === '/' ? 'dashboard' : next as View); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const signIn = (name?: string) => { setSignedIn(true); localStorage.setItem('finora-session', 'demo'); if (name) setStore(s => ({ ...s, profile: { ...s.profile, name, avatar: name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() } })); navigate('dashboard'); setToast('Welcome back to Finora'); };
+  const signIn = (name?: string) => { setSignedIn(true); localStorage.setItem('finora-session', 'demo'); apiRequest<{ userId: string }>('/api/session', { method: 'POST', body: JSON.stringify({ email: store.profile.email, name: name || store.profile.name }) }).then(result => localStorage.setItem('finora-user-id', result.userId)).catch(() => undefined); if (name) setStore(s => ({ ...s, profile: { ...s.profile, name, avatar: name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() } })); navigate('dashboard'); setToast('Welcome back to Finora'); };
   const logout = () => { setSignedIn(false); localStorage.removeItem('finora-session'); navigate('/'); setToast('You have been logged out'); };
   const updateStore = (patch: Partial<Store>, message?: string) => { setStore(s => ({ ...s, ...patch })); if (message) setToast(message); };
 
@@ -109,6 +114,7 @@ function App() {
     <main className="main-shell">
       <Topbar profile={store.profile} notices={store.notices} onMenu={() => setMobileOpen(v => !v)} onNotifications={() => navigate('notifications')} onProfile={() => navigate('settings')} />
       <div className="page-content">
+        <div className="backend-status" aria-live="polite"><span className="status-dot" />{backendLabel}</div>
         {view === 'dashboard' && <Dashboard store={store} navigate={navigate} openTransaction={() => { setEditing(null); setModal('transaction'); }} />}
         {view === 'transactions' && <Transactions store={store} onEdit={(t) => { setEditing(t); setModal('transaction'); }} onAdd={() => { setEditing(null); setModal('transaction'); }} onDelete={(t) => { if (window.confirm(`Delete ${t.description}?`)) updateStore({ transactions: store.transactions.filter(item => item.id !== t.id) }, 'Transaction deleted'); }} />}
         {view === 'budgets' && <Budgets store={store} onEdit={(b) => { setEditing(b); setModal('budget'); }} onAdd={() => { setEditing(null); setModal('budget'); }} onDelete={(b) => updateStore({ budgets: store.budgets.filter(item => item.id !== b.id) }, 'Budget removed')} />}

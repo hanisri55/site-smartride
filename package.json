@@ -3,22 +3,25 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.25.0",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "node server/index.mjs",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "check": "tsc --noEmit"
+    "preview": "NODE_ENV=production node server/index.mjs",
+    "check": "tsc --noEmit",
+    "test:local": "node scripts/test-local.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
+    "express": "^5.3.0",
     "lucide-react": "latest",
+    "mysql2": "^3.24.6",
     "react": "latest",
     "react-dom": "latest",
     "recharts": "latest",
     "vite": "latest"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

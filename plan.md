@@ -1,40 +1,41 @@
 # FINORA — Implementation Plan
 
 ## Product approach
-Finora will be a polished responsive personal-finance workspace built on the initialized React/TypeScript/Vite project. The first release will be immediately usable with a seeded demo account and browser persistence, while keeping the data layer typed and isolated around a single profile so the app can be connected to the managed relational database without redesigning the UI.
+Finora is a polished responsive personal-finance workspace with a seeded demo account, real MySQL-backed persistence, and a single-origin Express/Vite runtime. The browser cache is only a resilient fallback; authenticated workspace state is bootstrapped from and synchronized to MySQL through typed JSON API endpoints.
 
 ## Design direction
 - **Design movement:** editorial fintech dashboard — calm, high-contrast surfaces with precise data density and a warm human tone.
 - **Core principles:** signal over noise; actions are one tap away; numbers are explained, not merely displayed; every state feels intentional.
-- **Color philosophy:** ink navy and soft cloud backgrounds create trust and clarity; mint is the ownable Finora signal color for positive cash flow; coral is reserved for warnings and expenses; violet is used sparingly for intelligence/insights.
-- **Layout paradigm:** persistent rail navigation plus an offset, asymmetric content canvas; dashboards use a strong left narrative column and right-side evidence panels instead of a generic centered grid.
-- **Signature elements:** mint “pulse” status dot, rounded ledger cards with thin dividers, and compact uppercase data labels.
-- **Interaction philosophy:** progressive disclosure — overview first, then filtered details and editable drawers; destructive actions require confirmation; changes immediately update the summary.
-- **Animation:** short ease-out entrances, hover elevation on actionable cards, and restrained progress-bar transitions. Respect reduced-motion preferences.
-- **Typography:** Manrope for interface/body, Space Grotesk for display figures, and a compact mono label style for metadata.
-- **Brand essence:** a confident money cockpit for people who want clarity without financial jargon. Personality: clear, optimistic, disciplined.
-- **Brand voice:** direct, reassuring, practical. Example lines: “Your money has a pattern. Let’s make it work for you.” and “A better month starts with seeing this one clearly.”
-- **Wordmark/logo:** FINORA wordmark paired with a circular F-mark built from a split arc, suggesting a balance ring and a forward path.
+- **Color philosophy:** ink navy and cloud surfaces create trust; Finora Mint signals positive cash flow; coral marks warnings; violet is reserved for intelligence.
+- **Layout paradigm:** persistent rail navigation plus an offset asymmetric content canvas, with narrative summaries beside evidence panels.
+- **Signature elements:** mint pulse status dot, rounded ledger cards with thin dividers, and compact uppercase data labels.
+- **Interaction philosophy:** progressive disclosure with editable modals, confirmation for destructive actions, and immediate derived-summary updates.
+- **Animation:** restrained ease-out entrances, hover elevation, and progress transitions respecting reduced motion.
+- **Typography:** Manrope for interface/body, Space Grotesk for display figures, and DM Mono for metadata.
+- **Brand essence:** a confident money cockpit for people who want clarity without financial jargon. Clear, optimistic, disciplined.
+- **Brand voice:** direct, reassuring, practical. “Your money has a pattern. Let’s make it work for you.”
+- **Wordmark/logo:** Finora wordmark paired with a circular F-mark suggesting a balance ring and forward path.
 - **Signature brand color:** Finora Mint `#9BE7C1`.
 
 ## Implementation structure
-- `client/src/App.tsx`: route-aware authenticated shell, landing/auth gates, modal/drawer orchestration.
-- `client/src/pages/Home.tsx`: Finora product experience, dashboard, transactions, budgets, analytics, goals, insights, notifications and settings views.
-- `client/src/index.css`: complete design system, responsive rail/mobile navigation, chart/card/table states and animation.
-- `client/public/manus-routes.json`: canonical page route manifest.
-- `app.config.ts`: project logo metadata.
-- `server/`: preserve the existing Express/Vite serving foundation and current environment conventions.
+- `src/App.tsx`: route-aware authenticated shell, seeded state, API bootstrap/state sync, landing/auth gates, charts and modals.
+- `src/index.css`: responsive design system, rail/mobile navigation, chart/card/table states and animation.
+- `server/index.mjs`: Express API, additive MySQL schema initialization, session bootstrap, state persistence, health endpoint, Vite middleware in development and static serving in production.
+- `server/schema.sql`: documented `finora_users` and `finora_states` tables.
+- `scripts/test-local.mjs`: local health/bootstrap/state round-trip verification.
+- `public/manus-routes.json`: canonical public/private page route manifest.
+- `Dockerfile`: production build and single-origin container entrypoint.
 
 ## Functional scope
-- Seeded demo profile and realistic income/expense/budget/goal/notification data.
-- Local persistence for profile, theme, transactions, budgets, goals and notifications, keyed by the Finora demo account.
-- Working add/edit/delete transaction flows, add income/expense forms, search/filter/sort, budget and goal updates, notification read state, theme persistence and logout.
-- Derived totals, savings rate, budget usage, comparison copy, chart series and insight copy computed from current state.
-- Landing page, sign in/sign up/forgot password screens and route guard behavior in the client shell.
-- Loading/empty states and friendly toast feedback for actions.
+- Seeded demo profile and realistic income, expense, budget, goal and notification data.
+- Working add/edit/delete transactions, income/expense forms, search/filter/sort, budget and goal updates, notification read state, theme persistence and logout.
+- Derived totals, savings rate, budget usage, chart series and transparent insight copy computed from current state.
+- Landing, login, signup and forgot-password screens with route guard behavior.
+- API persistence through `GET /api/bootstrap`, `POST /api/session`, `POST /api/state`, and `GET /api/health`; MySQL is the primary store and localStorage is fallback only.
+- AI-generated insights are deterministic data summaries with the required informational disclaimer.
 
 ## Serving and delivery
-- Preview runs on the initialized Webdev runtime port 3000.
-- `manus-routes.json` covers public and private pages.
-- Build output is `dist`, with a self-contained pnpm/Vite build declaration prepared before publication.
-- No frontend secrets; AI insights are deterministic, transparent summaries of user data with the required informational disclaimer.
+- Preview and container listen on port 3000 and honor `PORT`.
+- Build output is `dist`.
+- `DATABASE_URL`/`DRIZZLE_DATABASE_URL` is read only at runtime; no credentials are bundled into the frontend.
+- The production container exposes unauthenticated `/api/health` for readiness.
